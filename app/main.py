@@ -1,6 +1,5 @@
 import socket
 
-
 class HTTPResponse:
     def __init__(self, status_code: int, body: bytes = None, headers: dict = None):
         self.status_code = status_code
@@ -29,7 +28,6 @@ class HTTPResponse:
             + b"\r\n\r\n"
             + (self.body or b"")
         )
-
 
 class HTTPRequest:
     raw_contents: bytes
