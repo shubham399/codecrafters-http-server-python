@@ -1,4 +1,5 @@
 import socket
+import threading
 
 
 class HTTPResponse:
@@ -69,11 +70,7 @@ class HTTPRequest:
         return f"<HTTPRequest {self.method} {self.path}>"
 
 
-def main():
-    server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
-    conn, addr = server_socket.accept()  # wait for client
-    print("Client connected", addr)
-
+def handle_connection(conn):
     request = HTTPRequest(conn.recv(1024))
     print(request)
 
@@ -87,11 +84,24 @@ def main():
         conn.sendall(bytes(response))
     elif request.path == "/user-agent":
         response = HTTPResponse(
-            200, body=request.headers["User-Agent"].encode(), headers={"Content-Type": "text/plain"}
+            200,
+            body=request.headers["User-Agent"].encode(),
+            headers={"Content-Type": "text/plain"},
         )
         conn.sendall(bytes(response))
     else:
         conn.sendall(bytes(HTTPResponse(404)))
+
+
+def main():
+    server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
+
+    while True:
+        conn, addr = server_socket.accept()  # wait for client
+        print("Client connected", addr)
+
+        thread = threading.Thread(target=handle_connection, args=(conn,))
+        thread.start()
 
 
 if __name__ == "__main__":
