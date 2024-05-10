@@ -2,6 +2,8 @@ import argparse
 import os
 import socket
 import threading
+import gzip
+import binascii
 
 
 class HTTPResponse:
@@ -96,9 +98,14 @@ def handle_connection(conn, data_directory):
         accepted_encoding = request.headers.get("Accept-Encoding", "").lower()
         print(accepted_encoding,"gzip" in accepted_encoding)
         if "gzip" in accepted_encoding:
+            # Compress the bytes
+            compressed_data = gzip.compress(value.encode("utf-8"))
+
+            # Convert compressed data to hex
+            hex_encoded_data = binascii.hexlify(compressed_data).decode('utf-8')
             response = HTTPResponse(
                 200,
-                body=value.encode("utf-8"),
+                body=hex_encoded_data,
                 headers={
                     "Content-Type": "text/plain",
                     "Content-Encoding": "gzip",
