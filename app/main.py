@@ -76,6 +76,9 @@ class HTTPRequest:
         return f"<HTTPRequest {self.method} {self.path}>"
 
 
+SUPPORTED_COMPRESSION_TYPES = ["gzip"]
+
+
 def handle_connection(conn, data_directory):
     request = HTTPRequest(conn.recv(1024))
     print(request)
@@ -84,10 +87,22 @@ def handle_connection(conn, data_directory):
         conn.sendall(bytes(HTTPResponse(200)))
     elif request.path.startswith("/echo"):
         value = request.path.split("/echo/")[1]
-        response = HTTPResponse(
-            200, body=value.encode("utf-8"), headers={"Content-Type": "text/plain"}
-        )
-        conn.sendall(bytes(response))
+        accepted_encoding = request.headers.get("Accept-Encoding", "")
+        if "gzip" in accepted_encoding:
+            response = HTTPResponse(
+                200,
+                body=value.encode("utf-8"),
+                headers={
+                    "Content-Type": "text/plain",
+                    "Content-Encoding": "gzip",
+                },
+            )
+            conn.sendall(bytes(response))
+        else:
+            response = HTTPResponse(
+                200, body=value.encode("utf-8"), headers={"Content-Type": "text/plain"}
+            )
+            conn.sendall(bytes(response))
     elif request.path == "/user-agent":
         response = HTTPResponse(
             200,
