@@ -99,13 +99,14 @@ def handle_connection(conn, data_directory):
         print(accepted_encoding,"gzip" in accepted_encoding)
         if "gzip" in accepted_encoding:
             # Compress the bytes
-            compressed_data = gzip.compress(value.encode("utf-8"))
-
-            # Convert compressed data to hex
+            input_str = value.encode("utf-8")
+            print(input_str)
+            compressed_data = gzip.compress(input_str)
             hex_encoded_data = binascii.hexlify(compressed_data).decode('utf-8')
+            print(hex_encoded_data)
             response = HTTPResponse(
                 200,
-                body=hex_encoded_data,
+                body=compressed_data,
                 headers={
                     "Content-Type": "text/plain",
                     "Content-Encoding": "gzip",
