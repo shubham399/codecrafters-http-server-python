@@ -7,12 +7,17 @@ import threading
 class HTTPResponse:
     def __init__(self, status_code: int, body: bytes = None, headers: dict = None):
         self.status_code = status_code
+        self.status_code_message = {
+            200: "OK",
+            404: "Not Found",
+            201: "Created",
+        }[status_code]
         self.body = body
         self.headers = headers or {}
 
     @property
     def status_line(self):
-        return f"HTTP/1.1 {self.status_code}"
+        return f"HTTP/1.1 {self.status_code} {self.status_code_message}"
 
     @property
     def headers_section(self):
@@ -88,6 +93,7 @@ def handle_connection(conn, data_directory):
     elif request.path.startswith("/echo"):
         value = request.path.split("/echo/")[1]
         accepted_encoding = request.headers.get("Accept-Encoding", "")
+        print(accepted_encoding,"gzip" in accepted_encoding)
         if "gzip" in accepted_encoding:
             response = HTTPResponse(
                 200,
