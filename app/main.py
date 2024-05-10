@@ -92,7 +92,8 @@ def handle_connection(conn, data_directory):
         conn.sendall(bytes(HTTPResponse(200)))
     elif request.path.startswith("/echo"):
         value = request.path.split("/echo/")[1]
-        accepted_encoding = request.headers.get("Accept-Encoding", "")
+        # Lowercase accepted_encoding
+        accepted_encoding = request.headers.get("Accept-Encoding", "").lower()
         print(accepted_encoding,"gzip" in accepted_encoding)
         if "gzip" in accepted_encoding:
             response = HTTPResponse(
